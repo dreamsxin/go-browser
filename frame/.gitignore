@@ -1,0 +1,9 @@
+.vscode
+.DS_Store
+._*
+Thumbs.db
+/windows/resources
+/windows/wrapper
+/example/example.exe
+/example2
+/example
