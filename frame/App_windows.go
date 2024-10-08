@@ -355,9 +355,15 @@ func appDir() string {
 	return home + "\\AppData"
 }
 
+type SettingOption func(*C.cef_settings_t)
+
+func SetSingleProcess(flag int) SettingOption {
+	return func(c *C.cef_settings_t) { c.single_process = C.int(1) }
+}
+
 // C:\Users\mirrr\AppData\Local\Temp
 // MakeApp is make and run one instance of application (At the moment, it is possible to create only one instance)
-func MakeApp(appName string) *App {
+func MakeApp(appName string, options ...SettingOption) *App {
 	lock.Lock()
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -411,7 +417,9 @@ func MakeApp(appName string) *App {
 	cefSettings.resources_dir_path = *cefString(resDir)
 	cefSettings.locales_dir_path = *cefString(resDir)
 	// cefSettings.background_color = 0xff999999
-
+	for _, option := range options {
+		option(cefSettings)
+	}
 	cefInitialize.Call(
 		uintptr(unsafe.Pointer(&app.mainArgs)),
 		uintptr(unsafe.Pointer(cefSettings)),
